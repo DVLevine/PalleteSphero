@@ -3,6 +3,8 @@ package team.pallette.d_line.palletesphero;
 import orbotix.robot.base.Robot;
 import orbotix.sphero.ConnectionListener;
 import orbotix.sphero.Sphero;
+import orbotix.view.calibration.ControllerActivity;
+import team.pallette.d_line.palletesphero.interfacing.JoystickView;
 import team.pallette.d_line.palletesphero.util.SystemUiHider;
 
 import android.annotation.TargetApi;
@@ -14,7 +16,6 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import orbotix.view.connection.SpheroConnectionView;
-import orbotix.achievement.AchievementManager;
 
 
 /**
@@ -23,7 +24,7 @@ import orbotix.achievement.AchievementManager;
  *
  * @see SystemUiHider
  */
-public class MainScreen extends Activity {
+public class MainScreen extends ControllerActivity {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -50,6 +51,8 @@ public class MainScreen extends Activity {
     private SpheroConnectionView mSpheroConnectionView;
 
     private Sphero mSphero;
+
+    private JoystickView mJoystick;
 
     /**
      * The instance of the {@link SystemUiHider} for this activity.
@@ -150,8 +153,18 @@ public class MainScreen extends Activity {
                 actionSource.blink(true);
                 actionSource.drive();
 
+                setRobot(mSphero);
+
+
+                mJoystick = (JoystickView) findViewById(R.id.Joystick);
+                mJoystick.setRobot(mSphero);
+                mJoystick.enable();
+                addController(mJoystick);
+
                 // End examples
             }
+
+
 
             // The method to run when a connection fails
             @Override
@@ -166,6 +179,7 @@ public class MainScreen extends Activity {
                 mSpheroConnectionView.startDiscovery();
             }
         };
+
 
         // Add the listener to the Sphero Connection View
         mSpheroConnectionView.addConnectionListener(mConnectionListener);
