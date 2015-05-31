@@ -161,6 +161,8 @@ public class MainScreen extends ControllerActivity {
                 mJoystick.enable();
                 addController(mJoystick);
 
+                mJoystick.executeTouchCommands();
+
                 // End examples
             }
 

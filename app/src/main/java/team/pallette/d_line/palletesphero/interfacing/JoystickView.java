@@ -1,13 +1,19 @@
 package team.pallette.d_line.palletesphero.interfacing;
 
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.util.Random;
 
 import orbotix.robot.base.DriveControl;
 import orbotix.robot.base.Robot;
@@ -48,6 +54,11 @@ public class JoystickView extends View implements Controller {
     private Runnable mOnStartRunnable;
     private Runnable mOnDragRunnable;
     private Runnable mOnEndRunnable;
+
+    //DAN
+    Instrumentation m_Instrumentation = new Instrumentation();
+
+    //END DAN
 
     public JoystickView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -252,6 +263,148 @@ public class JoystickView extends View implements Controller {
         
         return ret;
     }
+
+
+    // DAN
+    // Programmatically command touches to the phone interface
+
+    private void programDown(float posx, float posy){
+        //Instrumentation m_Instrumentation = new Instrumentation();
+        m_Instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_B);
+        m_Instrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_DOWN, posx, posy, 0));
+    }
+
+    private void programUp(float posx, float posy){
+        m_Instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_B);
+        m_Instrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_UP, posx, posy, 0));
+    }
+
+    private void programMove(float posx, float posy){
+        m_Instrumentation.sendKeyDownUpSync(KeyEvent.KEYCODE_B);
+        m_Instrumentation.sendPointerSync(MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),
+                MotionEvent.ACTION_MOVE, posx, posy, 0));
+    }
+
+    private void moveit(Point local_point){
+
+        Point drive_coord = this.getDrivePuckPosition(local_point);
+        this.drive_control.driveJoyStick(drive_coord.x, drive_coord.y);
+
+        //Set the puck position to within the bounds of the wheel
+        final Point i = getValidPuckPosition(local_point);
+        local_point.set(i.x, i.y);
+        this.puck.setPosition(new Point(local_point.x, local_point.y));
+        this.invalidate();
+    }
+
+    private void endMovement(){
+        this.resetPuck();
+        invalidate();
+        draggingPuck = false;
+        this.drive_control.stopDriving();
+    }
+
+    private void dmoveit(final Point local_point, final int delay){
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                Random rand = new Random();
+                local_point.offset(rand.nextInt(100) - 50, rand.nextInt(100) - 50);
+                moveit(local_point);
+                System.out.println("GOING");
+                System.out.println(local_point.x);
+                System.out.println(local_point.y);
+            }
+        }, delay);
+    }
+
+    private void dEnd(int delay){
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                endMovement();
+            }
+        }, delay);
+    }
+
+
+
+    public void executeTouchCommands(){
+        Random rand = new Random();
+        Point local_point = new Point(this.getMeasuredWidth() / 2, this.getMeasuredHeight() / 2);
+
+        //Drive initiate
+        draggingPuck = true;
+        this.drive_control.setSpeedScale(this.speed);
+        this.drive_control.startDriving(this.getContext(), DriveControl.JOY_STICK);
+
+        //Drive move
+ //       moveit(local_point);
+ //       local_point.offset(rand.nextInt(100) - 50, rand.nextInt(100) - 50);
+ //       System.out.println("POINT");
+ //       System.out.println(local_point);
+        dmoveit(local_point, 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 1 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 2 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 3 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 4 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 5 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 6 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 7 * 3 * 1000);
+
+//        rand = new Random();
+//        local_point.offset(rand.nextInt(100)-50,rand.nextInt(100) -50);
+//        System.out.println(local_point);
+        dmoveit(local_point, 8*3*1000);
+
+        dEnd(10*3*1000);
+
+     /*   Point go = new Point(this.getMeasuredWidth() / 2, this.getMeasuredHeight() / 2);
+        programDown(go.x, go.y);
+        programMove(go.x + 10, go.y + 10);
+        programMove(go.x + 20, go.y + 20);
+        programMove(go.x+50,go.y+50);
+        programMove(go.x-50,go.y-50);
+        programUp(go.x-50,go.y-50);
+*/
+
+
+    }
+
+
+    // DAN END
 
     @Override
 	public void interpretMotionEvent(MotionEvent event) {
